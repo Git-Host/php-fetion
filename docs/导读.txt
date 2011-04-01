@@ -1,31 +1,31 @@
-�����б���http://code.google.com/p/php-fetion/downloads/list
+下载列表：http://code.google.com/p/php-fetion/downloads/list
 
 
-��һ��ʹ��˵��
+（一）使用说明
 
-1. ��Ҫ��������ĳ�����ļ�ֻ��һ����PHPFetion.class.php���磺
+1. 需要包含进你的程序的文件只有一个：PHPFetion.class.php。如：
 
 	require 'PHPFetion.class.php';
 
-2. ���÷����磺
+2. 调用方法如：
 
-	$fetion = new PHPFetion('13500001111', '123123');	// �ֻ��š���������
+	$fetion = new PHPFetion('13500001111', '123123');	// 手机号、飞信密码
 
-	$fetion->send('13500001111', 'Hello!');	// �������ֻ��š���������
+	$fetion->send('13500001111', 'Hello!');	// 接收人手机号、飞信内容
 
-3. ע������
+3. 注意事项
 
-	(1) ��֤��ĳ�����utf-8���룻
-	(2) ��֤phpfetion.class.php����Ŀ¼�п�дȨ�ޣ���Ϊcookie�ļ������������
-	(3) send()�������з���ֵ�ģ�����ͨ�������ı��ж��Ƿ��ͳɹ������ǵ�wap�����Ķ�������û��������д�����ڷ��ͳɹ����жϣ�
-
-
-
-������ʵ��ԭ��
-
-1. ����php��CURLģ���¼wap����ţ���ģ�ⷢ�ͷ��š�
+	(1) 保证你的程序是utf-8编码；
+	(2) 保证phpfetion.class.php所在目录有可写权限，因为cookie文件将产生在这里；
+	(3) send()方法是有返回值的，可以通过分析文本判断是否发送成功。考虑到wap界面会改动，所以没有在类里写死关于发送成功的判断；
 
 
-����������
 
-1. wap���ŵ�¼��ַ��http://f.10086.cn
+（二）实现原理
+
+1. 利用php的CURL模拟登录wap版飞信，并模拟发送飞信。
+
+
+（三）其他
+
+1. wap飞信登录地址：http://f.10086.cn
