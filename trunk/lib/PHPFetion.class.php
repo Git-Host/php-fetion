@@ -151,4 +151,30 @@ class PHPFetion {
 		return $result;
 	}
 	
+	/**
+	 * 退出飞信
+	 * @return string
+	 */
+	protected function _logout() {
+		$curl = curl_init('http://f.10086.cn/im/index/logoutsubmit.action?t=30310469084920296');
+		curl_setopt($curl, CURLOPT_HEADER, 0);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($curl, CURLOPT_COOKIEFILE, $this->_cookie);
+		$result = curl_exec($curl);
+		curl_close($curl);
+		
+		return $result;
+	}
+
+	/**
+	 * 析构函数
+	 */
+	public function __destruct() {
+		// 退出飞信
+		$this->_logout();
+		
+		// 删除Cookie文件
+		unlink($this->_cookie);
+	}
+	
 }
