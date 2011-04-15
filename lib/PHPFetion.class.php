@@ -1,8 +1,8 @@
 <?php
 /**
  * PHP飞信发送类
- * @author quanhengzhuang <phpqhz@gmail.com>
- * @version 1.1.0
+ * @author quanhengzhuang <blog.quanhz.com>
+ * @version 1.1.1
  */
 class PHPFetion {
 	
@@ -156,7 +156,7 @@ class PHPFetion {
 	 * @return string
 	 */
 	protected function _logout() {
-		$curl = curl_init('http://f.10086.cn/im/index/logoutsubmit.action?t=30310469084920296');
+		$curl = curl_init('http://f.10086.cn/im/index/logoutsubmit.action');
 		curl_setopt($curl, CURLOPT_HEADER, 0);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($curl, CURLOPT_COOKIEFILE, $this->_cookie);
