@@ -19,10 +19,10 @@ class PHPFetion {
 	protected $_password;
 	
 	/**
-	 * Cookie路径
+	 * Cookie字符串
 	 * @param string
 	 */
-	protected $_cookie;
+	protected $_cookie = '';
 	
 	/**
 	 * 构造函数
@@ -36,26 +36,15 @@ class PHPFetion {
 		
 		$this->_mobile = $mobile;
 		$this->_password = $password;
-		$this->_cookie = dirname(__FILE__).'/'.$mobile.'_cookie.txt';
 		
 		$this->_login();
 	}
 	
 	/**
-	 * 向指定的手机号发送飞信
-	 * @param string $mobile 手机号(接收者)
-	 * @param string $message 短信内容
-	 * @return string
+	 * 析构函数
 	 */
-	public function send($mobile, $message) {
-		if($mobile == $this->_mobile) {
-			// 给自己发短信
-			return $this->_toMyself($message);
-		} else {
-			// 给好友发短信
-			$uid = $this->_getUid($mobile);
-			return $this->_toUid($uid, $message);
-		}
+	public function __destruct() {
+		$this->_logout();
 	}
 	
 	/**
@@ -63,42 +52,50 @@ class PHPFetion {
 	 * @return string
 	 */
 	protected function _login() {
-		$post = array(
-			'm' => $this->_mobile,
-			'pass' => $this->_password,
-			'loginstatus' => 1,
-		);
+		$uri = '/im/login/inputpasssubmit1.action';
+		$data = 'm='.$this->_mobile.'&pass='.urlencode($this->_password).'&loginstatus=1';
 		
-		$curl = curl_init('http://f.10086.cn/im/login/inputpasssubmit1.action');
-		curl_setopt($curl, CURLOPT_HEADER, 0);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_COOKIEJAR, $this->_cookie);
-		curl_setopt($curl, CURLOPT_POST, 1);
-		curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($post));
-		$result = curl_exec($curl);
-		curl_close($curl);
+		$result = $this->_postWithCookie($uri, $data);
 		
+		// 解析Cookie
+		preg_match_all('/.*?\r\nSet-Cookie: (.*?);.*?/si', $result, $matches);
+		if(isset($matches[1])) {
+			$this->_cookie = implode('; ', $matches[1]);
+		}
+
 		return $result;
 	}
-	
+
+	/**
+	 * 向指定的手机号发送飞信
+	 * @param string $mobile 手机号(接收者)
+	 * @param string $message 短信内容
+	 * @return string
+	 */
+	public function send($mobile, $message) {
+		if($message === '') {
+			return '';
+		}
+
+		// 判断是给自己发还是给好友发
+		if($mobile == $this->_mobile) {
+			return $this->_toMyself($message);
+		} else {
+			$uid = $this->_getUid($mobile);
+			return $uid === '' ? '' : $this->_toUid($uid, $message);
+		}
+	}
+
 	/**
 	 * 获取飞信ID
 	 * @param string $mobile 手机号
 	 * @return string
 	 */
 	protected function _getUid($mobile) {
-		$post = array(
-			'searchText' => $mobile,
-		);
+		$uri = '/im/index/searchOtherInfoList.action';
+		$data = 'searchText='.$mobile;
 		
-		$curl = curl_init('http://f.10086.cn/im/index/searchOtherInfoList.action');
-		curl_setopt($curl, CURLOPT_HEADER, 0);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_COOKIEFILE, $this->_cookie);
-		curl_setopt($curl, CURLOPT_POST, 1);
-		curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($post));
-		$result = curl_exec($curl);
-		curl_close($curl);
+		$result = $this->_postWithCookie($uri, $data);
 		
 		// 匹配
 		preg_match('/toinputMsg\.action\?touserid=(\d+)/si', $result, $matches);
@@ -113,18 +110,10 @@ class PHPFetion {
 	 * @return string
 	 */
 	protected function _toUid($uid, $message) {
-		$post = array(
-			'msg' => $message,
-		);
+		$uri = '/im/chat/sendMsg.action?touserid='.$uid;
+		$data = 'msg='.urlencode($message);
 		
-		$curl = curl_init('http://f.10086.cn/im/chat/sendMsg.action?touserid='.$uid);
-		curl_setopt($curl, CURLOPT_HEADER, 0);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_COOKIEFILE, $this->_cookie);
-		curl_setopt($curl, CURLOPT_POST, 1);
-		curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($post));
-		$result = curl_exec($curl);
-		curl_close($curl);
+		$result = $this->_postWithCookie($uri, $data);
 		
 		return $result;
 	}
@@ -135,18 +124,8 @@ class PHPFetion {
 	 * @return string
 	 */
 	protected function _toMyself($message) {
-		$post = array(
-			'msg' => $message,
-		);
-		
-		$curl = curl_init('http://f.10086.cn/im/user/sendMsgToMyselfs.action');
-		curl_setopt($curl, CURLOPT_HEADER, 0);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_COOKIEFILE, $this->_cookie);
-		curl_setopt($curl, CURLOPT_POST, 1);
-		curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($post));
-		$result = curl_exec($curl);
-		curl_close($curl);
+		$uri = '/im/user/sendMsgToMyselfs.action';
+		$result = $this->_postWithCookie($uri, 'msg='.urlencode($message));
 		
 		return $result;
 	}
@@ -156,25 +135,35 @@ class PHPFetion {
 	 * @return string
 	 */
 	protected function _logout() {
-		$curl = curl_init('http://f.10086.cn/im/index/logoutsubmit.action');
-		curl_setopt($curl, CURLOPT_HEADER, 0);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_COOKIEFILE, $this->_cookie);
-		$result = curl_exec($curl);
-		curl_close($curl);
+		$uri = '/im/index/logoutsubmit.action';
+		$this->_postWithCookie($uri, '');
 		
 		return $result;
 	}
-
-	/**
-	 * 析构函数
-	 */
-	public function __destruct() {
-		// 退出飞信
-		$this->_logout();
-		
-		// 删除Cookie文件
-		unlink($this->_cookie);
-	}
 	
+	/**
+	 * 携带Cookie向f.10086.cn发送POST请求
+	 * @param string $uri
+	 * @param string $uri
+	 */
+	protected function _postWithCookie($uri, $data) {
+		$fp = fsockopen('f.10086.cn', 80);
+		fputs($fp, "POST $uri HTTP/1.1\r\n");
+		fputs($fp, "Host: f.10086.cn\r\n");
+		fputs($fp, "Cookie: {$this->_cookie}\r\n");
+		fputs($fp, "Content-Type: application/x-www-form-urlencoded\r\n");
+		fputs($fp, "Content-Length: ".strlen($data)."\r\n");
+		fputs($fp, "Connection: close\r\n\r\n");
+		fputs($fp, $data);
+
+		$result = '';
+		while(!feof($fp)) {
+			$result .= fgets($fp);
+		}
+
+		fclose($fp);
+
+		return $result;
+	}
+
 }
