@@ -4,9 +4,9 @@
 
 （一）使用说明
 
-1. 需要包含进你的程序的文件只有一个：PHPFetion.class.php。如：
+1. 需要包含进你的程序的文件只有一个：PHPFetion.php。如：
 
-	require 'PHPFetion.class.php';
+	require 'PHPFetion.php';
 
 2. 调用方法如：
 
