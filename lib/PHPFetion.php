@@ -144,7 +144,7 @@ class PHPFetion {
 	/**
 	 * 携带Cookie向f.10086.cn发送POST请求
 	 * @param string $uri
-	 * @param string $uri
+	 * @param string $data
 	 */
 	protected function _postWithCookie($uri, $data) {
 		$fp = fsockopen('f.10086.cn', 80);
