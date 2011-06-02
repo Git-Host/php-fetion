@@ -2,7 +2,7 @@
 /**
  * PHP飞信发送类
  * @author quanhengzhuang <blog.quanhz.com>
- * @version 1.2.0
+ * @version 1.2.1
  */
 class PHPFetion {
 	
