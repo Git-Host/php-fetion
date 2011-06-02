@@ -136,7 +136,7 @@ class PHPFetion {
 	 */
 	protected function _logout() {
 		$uri = '/im/index/logoutsubmit.action';
-		$this->_postWithCookie($uri, '');
+		$result = $this->_postWithCookie($uri, '');
 		
 		return $result;
 	}
