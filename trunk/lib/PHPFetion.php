@@ -14,13 +14,13 @@ class PHPFetion {
 	
 	/**
 	 * 飞信密码
-	 * @param string
+	 * @var string
 	 */
 	protected $_password;
 	
 	/**
 	 * Cookie字符串
-	 * @param string
+	 * @var string
 	 */
 	protected $_cookie = '';
 	
